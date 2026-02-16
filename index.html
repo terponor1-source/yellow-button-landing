@@ -5,55 +5,161 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Yellow Button Landing</title>
   <style>
-    html, body {
-      height: 100%;
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
       margin: 0;
       font-family: 'Segoe UI', system-ui, sans-serif;
-      background: linear-gradient(135deg, #f3f2f8, #e4edf5);
       display: flex;
       align-items: center;
       justify-content: center;
+      background: #f5f5f7;
+      transition: background 0.4s ease;
     }
 
     .card {
+      width: min(90vw, 420px);
       text-align: center;
-      padding: 3rem;
-      border-radius: 1rem;
-      box-shadow: 0 20px 40px rgba(15, 23, 42, 0.15);
-      background: white;
+      padding: 3rem 2.5rem;
+      border-radius: 1.5rem;
+      background: rgba(255, 255, 255, 0.95);
+      box-shadow: 0 25px 60px rgba(15, 23, 42, 0.2);
+      backdrop-filter: blur(12px);
+    }
+
+    .eyebrow {
+      letter-spacing: 0.3em;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      color: #7c7c8f;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 4vw, 2.6rem);
+      margin: 0.5rem 0;
+      color: #1a1a1f;
+    }
+
+    .color-label {
+      display: block;
+      margin: 0.85rem 0;
+      font-size: 1rem;
+      color: #555569;
+      font-weight: 600;
+    }
+
+    .color-label span {
+      display: inline-block;
+      margin-left: 0.4rem;
+      color: inherit;
+    }
+
+    #color-info {
+      margin-bottom: 2rem;
+      color: #666676;
     }
 
     button {
       border: none;
       background: #ffd700;
       color: #111;
-      padding: 1rem 2rem;
-      font-size: 1.25rem;
+      padding: 1rem 2.5rem;
+      font-size: 1.2rem;
       border-radius: 999px;
       cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-      font-weight: 600;
+      font-weight: 700;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.3s ease;
+      box-shadow: 0 20px 40px rgba(15, 23, 42, 0.25);
     }
 
     button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 15px 25px rgba(255, 215, 0, 0.35);
+      transform: translateY(-3px);
+      box-shadow: 0 25px 40px rgba(15, 23, 42, 0.25);
     }
   </style>
 </head>
 <body>
   <div class="card">
-    <h1>Landing test</h1>
-    <p>Tap the button to see it change.</p>
-    <button id="color-btn">Yellow</button>
+    <p class="eyebrow">Color Opposites</p>
+    <h1 id="color-title">Color: Yellow Button</h1>
+    <label class="color-label" for="color-btn">Current color:<span id="color-name">Yellow</span></label>
+    <p id="color-info">Press the button to refresh the color palette.</p>
+    <button id="color-btn" type="button">Yellow</button>
   </div>
   <script>
+    const colors = [
+      { name: 'Sunset Orange', value: '#fd5e53' },
+      { name: 'Cobalt Blue', value: '#0047ab' },
+      { name: 'Mango Tango', value: '#ff8243' },
+      { name: 'Forest Green', value: '#228b22' },
+      { name: 'Electric Violet', value: '#8f00ff' },
+      { name: 'Coral Reef', value: '#ff7f50' },
+      { name: 'Midnight Navy', value: '#2c3e50' },
+      { name: 'Mint Leaf', value: '#3eb489' },
+      { name: 'Solar Flare', value: '#ffb347' },
+      { name: 'Royal Purple', value: '#7851a9' },
+      { name: 'Crimson Tide', value: '#dc143c' },
+      { name: 'Ocean Teal', value: '#008080' },
+      { name: 'Amber Glow', value: '#ffbf00' },
+      { name: 'Arctic Sky', value: '#5dd9c1' },
+      { name: 'Cherry Blossom', value: '#ffb7c5' },
+      { name: 'Sandstone', value: '#c19a6b' },
+      { name: 'Lemon Zest', value: '#fede00' },
+      { name: 'Deep Plum', value: '#4b0082' },
+      { name: 'Steel Indigo', value: '#1f305e' },
+      { name: 'Rosy Quartz', value: '#f7c6c7' }
+    ];
+
     const button = document.getElementById('color-btn');
-    button.addEventListener('click', () => {
-      button.textContent = 'Hellow!';
-      button.style.color = 'red';
-      button.style.fontWeight = 'bold';
-    });
+    const title = document.getElementById('color-title');
+    const colorName = document.getElementById('color-name');
+    const colorInfo = document.getElementById('color-info');
+
+    const hexToRgb = (hex) => {
+      const normalized = hex.replace('#', '');
+      const bigint = parseInt(normalized, 16);
+      return {
+        r: (bigint >> 16) & 255,
+        g: (bigint >> 8) & 255,
+        b: bigint & 255
+      };
+    };
+
+    const rgbToHex = (r, g, b) =>
+      `#${[r, g, b]
+        .map((val) => val.toString(16).padStart(2, '0'))
+        .join('')}`;
+
+    const getOpposite = (hex) => {
+      const { r, g, b } = hexToRgb(hex);
+      return rgbToHex(255 - r, 255 - g, 255 - b);
+    };
+
+    const getContrast = (hex) => {
+      const { r, g, b } = hexToRgb(hex);
+      const brightness = r * 0.299 + g * 0.587 + b * 0.114;
+      return brightness > 180 ? '#111' : '#fff';
+    };
+
+    const pickRandomColor = () => colors[Math.floor(Math.random() * colors.length)];
+
+    const applyColor = ({ name, value }) => {
+      const opposite = getOpposite(value);
+      button.textContent = name;
+      button.style.backgroundColor = value;
+      button.style.color = getContrast(value);
+      title.textContent = `Color: ${name}`;
+      colorName.textContent = name;
+      colorInfo.textContent = `Opposite background: ${opposite.toUpperCase()}`;
+      document.body.style.backgroundColor = opposite;
+    };
+
+    button.addEventListener('click', () => applyColor(pickRandomColor()));
+    applyColor(pickRandomColor());
   </script>
 </body>
 </html>
