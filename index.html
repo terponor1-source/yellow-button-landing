@@ -80,6 +80,101 @@
       transform: translateY(-3px);
       box-shadow: 0 25px 40px rgba(15, 23, 42, 0.25);
     }
+
+    .celebration {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      overflow: hidden;
+    }
+
+    .celebration.active {
+      opacity: 1;
+    }
+
+    .balloon {
+      position: relative;
+      width: 110px;
+      height: 150px;
+      border-radius: 60% 60% 50% 50%;
+      background: radial-gradient(circle at 30% 30%, #ff7eb6 0%, #ff5e62 70%);
+      animation: balloon-rise 2s ease-out forwards;
+      box-shadow: inset -5px -8px 20px rgba(255, 255, 255, 0.4);
+    }
+
+    .balloon::after {
+      content: '';
+      position: absolute;
+      bottom: -20px;
+      left: 50%;
+      width: 2px;
+      height: 40px;
+      background: #1a1a1f;
+      transform: translateX(-50%);
+    }
+
+    @keyframes balloon-rise {
+      0% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+      }
+      70% {
+        transform: translateY(-200px) scale(1.05);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-240px) scale(0.1);
+        opacity: 0;
+      }
+    }
+
+    .celebration-message {
+      position: absolute;
+      bottom: 20%;
+      font-size: clamp(1.25rem, 2vw, 1.8rem);
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      text-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    .celebration-message.visible {
+      opacity: 1;
+    }
+
+    .confetti {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .confetti span {
+      position: absolute;
+      width: 8px;
+      height: 16px;
+      border-radius: 50%;
+      animation-name: confetti-fall;
+      animation-timing-function: ease-in;
+      animation-fill-mode: forwards;
+    }
+
+    @keyframes confetti-fall {
+      0% {
+        opacity: 1;
+        transform: translateY(0) rotate(0deg);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(160px) rotate(360deg);
+      }
+    }
   </style>
 </head>
 <body>
@@ -90,6 +185,13 @@
     <p id="color-info">Press the button to refresh the color palette.</p>
     <button id="color-btn" type="button">Yellow</button>
   </div>
+
+  <div id="celebration" class="celebration" aria-hidden="true">
+    <div class="balloon"></div>
+    <div id="confetti" class="confetti"></div>
+    <p id="celebration-text" class="celebration-message">George-Ionut Badara e mare smecher!</p>
+  </div>
+
   <script>
     const colors = [
       { name: 'Sunset Orange', value: '#fd5e53' },
@@ -118,6 +220,9 @@
     const title = document.getElementById('color-title');
     const colorName = document.getElementById('color-name');
     const colorInfo = document.getElementById('color-info');
+    const celebration = document.getElementById('celebration');
+    const celebrationText = document.getElementById('celebration-text');
+    const confettiContainer = document.getElementById('confetti');
 
     const hexToRgb = (hex) => {
       const normalized = hex.replace('#', '');
@@ -158,7 +263,41 @@
       document.body.style.backgroundColor = opposite;
     };
 
-    button.addEventListener('click', () => applyColor(pickRandomColor()));
+    const createConfetti = () => {
+      const colors = ['#f94144', '#f3722c', '#f8961e', '#f9844a', '#90be6d', '#577590', '#4ecdc4'];
+      confettiContainer.innerHTML = '';
+      for (let i = 0; i < 24; i += 1) {
+        const piece = document.createElement('span');
+        piece.style.left = `${Math.random() * 100}%`;
+        piece.style.background = colors[i % colors.length];
+        piece.style.animationDuration = `${1.2 + Math.random() * 0.8}s`;
+        piece.style.animationDelay = `${Math.random() * 0.4}s`;
+        piece.style.transform = `scale(${0.8 + Math.random() * 0.6}) rotate(${Math.random() * 360}deg)`;
+        confettiContainer.appendChild(piece);
+      }
+    };
+
+    let celebrationTriggered = false;
+
+    const triggerCelebration = () => {
+      if (celebrationTriggered) return;
+      celebrationTriggered = true;
+      createConfetti();
+      celebration.classList.add('active');
+      setTimeout(() => celebrationText.classList.add('visible'), 1200);
+      setTimeout(() => {
+        celebrationText.classList.remove('visible');
+        celebration.classList.remove('active');
+        confettiContainer.innerHTML = '';
+      }, 4500);
+    };
+
+    button.addEventListener('click', () => {
+      applyColor(pickRandomColor());
+      triggerCelebration();
+    });
+
+    // Initial render
     applyColor(pickRandomColor());
   </script>
 </body>
