@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Yellow Button Landing</title>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: linear-gradient(135deg, #f3f2f8, #e4edf5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card {
+      text-align: center;
+      padding: 3rem;
+      border-radius: 1rem;
+      box-shadow: 0 20px 40px rgba(15, 23, 42, 0.15);
+      background: white;
+    }
+
+    button {
+      border: none;
+      background: #ffd700;
+      color: #111;
+      padding: 1rem 2rem;
+      font-size: 1.25rem;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      font-weight: 600;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 25px rgba(255, 215, 0, 0.35);
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Landing test</h1>
+    <p>Tap the button to see it change.</p>
+    <button id="color-btn">Yellow</button>
+  </div>
+  <script>
+    const button = document.getElementById('color-btn');
+    button.addEventListener('click', () => {
+      button.textContent = 'Hellow!';
+      button.style.color = 'red';
+      button.style.fontWeight = 'bold';
+    });
+  </script>
+</body>
+</html>
