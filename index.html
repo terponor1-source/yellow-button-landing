@@ -107,13 +107,25 @@
       box-shadow: inset -5px -8px 20px rgba(255, 255, 255, 0.4);
     }
 
+    .balloon::before {
+      content: '';
+      position: absolute;
+      top: 12%;
+      left: 35%;
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.7);
+      filter: blur(0.5px);
+    }
+
     .balloon::after {
       content: '';
       position: absolute;
-      bottom: -20px;
+      bottom: -30px;
       left: 50%;
       width: 2px;
-      height: 40px;
+      height: 60px;
       background: #1a1a1f;
       transform: translateX(-50%);
     }
@@ -140,9 +152,13 @@
       color: #fff;
       text-transform: uppercase;
       letter-spacing: 0.1em;
-      text-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      text-shadow: 0 10px 35px rgba(0, 0, 0, 0.6);
       opacity: 0;
       transition: opacity 0.4s ease;
+      background: rgba(0, 0, 0, 0.75);
+      padding: 0.75rem 1.25rem;
+      border-radius: 999px;
+      border: 2px solid rgba(255, 255, 255, 0.9);
     }
 
     .celebration-message.visible {
@@ -175,6 +191,43 @@
         transform: translateY(160px) rotate(360deg);
       }
     }
+
+    .balloon-pop {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .balloon-pop span {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      opacity: 0;
+      --dx: 0px;
+      --dy: 0px;
+    }
+
+    .balloon-pop.visible span {
+      animation: pop-burst 0.8s ease-out forwards;
+    }
+
+    @keyframes pop-burst {
+      0% {
+        transform: translate(0, 0) scale(0.2);
+        opacity: 1;
+      }
+      70% {
+        transform: translate(var(--dx), var(--dy)) scale(1.1);
+        opacity: 1;
+      }
+      100% {
+        transform: translate(var(--dx), var(--dy)) scale(1.4);
+        opacity: 0;
+      }
+    }
   </style>
 </head>
 <body>
@@ -187,7 +240,9 @@
   </div>
 
   <div id="celebration" class="celebration" aria-hidden="true">
-    <div class="balloon"></div>
+    <div class="balloon">
+      <div id="pop-effect" class="balloon-pop"></div>
+    </div>
     <div id="confetti" class="confetti"></div>
     <p id="celebration-text" class="celebration-message">George-Ionut Badara e mare smecher!</p>
   </div>
@@ -223,6 +278,7 @@
     const celebration = document.getElementById('celebration');
     const celebrationText = document.getElementById('celebration-text');
     const confettiContainer = document.getElementById('confetti');
+    const popEffect = document.getElementById('pop-effect');
 
     const hexToRgb = (hex) => {
       const normalized = hex.replace('#', '');
@@ -277,17 +333,37 @@
       }
     };
 
+    const createPopBurst = () => {
+      const burstColors = ['#fff9c4', '#ff8a80', '#80d8ff', '#ff80ab', '#f48fb1', '#b39ddb'];
+      popEffect.innerHTML = '';
+      for (let i = 0; i < 12; i += 1) {
+        const piece = document.createElement('span');
+        const angle = Math.random() * Math.PI * 2;
+        const distance = 36 + Math.random() * 24;
+        const dx = Math.cos(angle) * distance;
+        const dy = Math.sin(angle) * distance * -1;
+        piece.style.setProperty('--dx', `${dx.toFixed(1)}px`);
+        piece.style.setProperty('--dy', `${dy.toFixed(1)}px`);
+        piece.style.background = burstColors[i % burstColors.length];
+        piece.style.animationDelay = `${Math.random() * 0.25}s`;
+        popEffect.appendChild(piece);
+      }
+    };
+
     let celebrationTriggered = false;
 
     const triggerCelebration = () => {
       if (celebrationTriggered) return;
       celebrationTriggered = true;
       createConfetti();
+      createPopBurst();
+      popEffect.classList.add('visible');
       celebration.classList.add('active');
       setTimeout(() => celebrationText.classList.add('visible'), 1200);
       setTimeout(() => {
         celebrationText.classList.remove('visible');
         celebration.classList.remove('active');
+        popEffect.classList.remove('visible');
         confettiContainer.innerHTML = '';
       }, 4500);
     };
